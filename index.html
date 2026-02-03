@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Detection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>AI-Generated Voice Detection</h1>
+        <p>Upload an audio file to classify it as Human or AI-generated.</p>
+    </header>
+    <main class="container">
+        <div class="card upload-card">
+            <h2>Upload Audio File</h2>
+            <label for="audio-file">Select an MP3 file:</label>
+            <input type="file" id="audio-file" accept=".mp3">
+        </div>
+        <button id="predict-btn" disabled>Predict</button>
+        <div id="loading" class="hidden">Processing...</div>
+        <div id="result" class="card hidden">
+            <h2>Analysis Result</h2>
+            <p><strong>Prediction:</strong> <span id="prediction"></span></p>
+            <div class="confidence-section">
+                <label>Confidence:</label>
+                <div class="confidence-bar">
+                    <div id="confidence-fill" class="confidence-fill"></div>
+                </div>
+                <span id="confidence-text"></span>
+            </div>
+            <p><strong>Explanation:</strong> <span id="explanation"></span></p>
+        </div>
+        <div id="error" class="hidden"></div>
+    </main>
+    <footer>
+        <p>This tool is for demonstration purposes only. Results may vary based on the backend model.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
