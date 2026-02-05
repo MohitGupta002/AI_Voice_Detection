@@ -27,4 +27,23 @@ ml/models/*.pt
 # Outputs (keep images optional)
 outputs/*.log
 
+# Data folders
+data/raw/
+data/features/
+data/processed/
+
+# Audio files
+*.mp3
+*.wav
+
+# PyTorch artifacts
+*.pt
+*.pth
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual env
+.venv/
 
