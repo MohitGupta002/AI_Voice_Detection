@@ -1,41 +1,86 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Voice Detection</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Voice Detection</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header>
-        <h1>AI-Generated Voice Detection</h1>
-        <p>Upload an audio file to classify it as Human or AI-generated.</p>
-    </header>
-    <main class="container">
-        <div class="card upload-card">
-            <h2>Upload Audio File</h2>
-            <label for="audio-file">Select an MP3 file:</label>
-            <input type="file" id="audio-file" accept=".mp3">
+  <div class="bg"></div>
+
+  <header class="top">
+    <div class="pill">AI • Audio Classification</div>
+    <h1>AI-Generated Voice Detection</h1>
+    <p>Upload an audio file to classify it as <b>Human</b> or <b>AI-generated</b>.</p>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <!-- Upload -->
+      <div class="card upload-card">
+        <h2>Upload Audio</h2>
+        <p class="muted">Supported: MP3 (recommended), WAV • max ~10–20MB</p>
+
+        <label class="uploadBox" for="audio-file">
+          <div class="icon">🎧</div>
+          <div class="uploadText">
+            <div class="uploadTitle">Choose an audio file</div>
+            <div id="fileName" class="uploadSub">No file selected</div>
+          </div>
+          <div class="uploadBtn">Browse</div>
+        </label>
+
+        <input type="file" id="audio-file" accept=".mp3,.wav" />
+
+        <button id="predict-btn" class="btn" disabled>
+          Predict <span class="arrow">→</span>
+        </button>
+
+        <div class="tip">Tip: 5–15 sec clear speech gives best accuracy.</div>
+      </div>
+
+      <!-- Result -->
+      <div id="result" class="card hidden">
+        <div class="resultHead">
+          <h2>Analysis Result</h2>
+          <span id="badge" class="badge neutral">—</span>
         </div>
-        <button id="predict-btn" disabled>Predict</button>
-        <div id="loading" class="hidden">Processing...</div>
-        <div id="result" class="card hidden">
-            <h2>Analysis Result</h2>
-            <p><strong>Prediction:</strong> <span id="prediction"></span></p>
-            <div class="confidence-section">
-                <label>Confidence:</label>
-                <div class="confidence-bar">
-                    <div id="confidence-fill" class="confidence-fill"></div>
-                </div>
-                <span id="confidence-text"></span>
-            </div>
-            <p><strong>Explanation:</strong> <span id="explanation"></span></p>
+
+        <div class="row">
+          <div class="label">Prediction</div>
+          <div class="value"><span id="prediction"></span></div>
         </div>
-        <div id="error" class="hidden"></div>
-    </main>
-    <footer>
-        <p>This tool is for demonstration purposes only. Results may vary based on the backend model.</p>
-    </footer>
-    <script src="script.js"></script>
+
+        <div class="confidence-section">
+          <div class="labelRow">
+            <span class="label">Confidence</span>
+            <span id="confidence-text" class="valueSmall"></span>
+          </div>
+          <div class="confidence-bar">
+            <div id="confidence-fill" class="confidence-fill"></div>
+          </div>
+        </div>
+
+        <div class="explainBox">
+          <div class="label">Explanation</div>
+          <div class="muted"><span id="explanation"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="loading" class="loading hidden">Processing…</div>
+    <div id="error" class="error hidden"></div>
+  </main>
+
+  <footer class="footer">
+    <p>This tool is for demonstration purposes only. Results may vary based on the backend model.</p>
+  </footer>
+
+  <!-- config should load before script -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
