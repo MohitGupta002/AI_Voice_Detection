@@ -1,0 +1,22 @@
+# Core ML
+torch>=2.1.0
+numpy>=1.23.0
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.1
+
+# Transformer models
+transformers>=4.38.0
+
+# Evaluation / plots
+scikit-learn>=1.3.0
+matplotlib>=3.7.0
+tqdm>=4.66.0
+
+# Backend API
+fastapi>=0.110.0
+uvicorn>=0.27.0
+pydantic>=2.0.0
+python-multipart>=0.0.9
+pydub>=0.25.1

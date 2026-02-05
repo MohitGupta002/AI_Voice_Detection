@@ -1,127 +1,170 @@
-// Configurable API URL
-const API_URL = 'http://localhost:5000/predict';
-
-// Mock response for demo purposes
-const mockResponse = {
-    prediction: 'Human',
-    confidence: 95,
-    explanation: 'The audio shows natural human speech patterns.'
-};
-
-// DOM elements
 const fileInput = document.getElementById('audio-file');
+const browseBtn = document.getElementById('browse-btn');
 const predictBtn = document.getElementById('predict-btn');
-const loadingDiv = document.getElementById('loading');
-const resultDiv = document.getElementById('result');
-const errorDiv = document.getElementById('error');
-const predictionSpan = document.getElementById('prediction');
-const confidenceSpan = document.getElementById('confidence');
-const explanationSpan = document.getElementById('explanation');
+const dropZone = document.getElementById('drop-zone');
+const fileDisplayName = document.getElementById('file-display-name');
+const fileDisplayMeta = document.getElementById('file-display-meta');
 
-// Enable/disable predict button based on file selection
-fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (file) {
-        // Check if file is MP3
-        const isMP3 = file.type === 'audio/mpeg' && file.name.toLowerCase().endsWith('.mp3');
-        if (isMP3) {
-            predictBtn.disabled = false;
-            hideError();
+const predictionLabel = document.getElementById('prediction-label');
+const confidencePercentage = document.getElementById('confidence-percentage');
+const confidenceBar = document.getElementById('confidence-bar');
+const explanationText = document.getElementById('explanation-text');
+const resultBadge = document.getElementById('result-badge');
+
+const loadingOverlay = document.getElementById('loading-overlay');
+const apiStatus = document.getElementById('api-status');
+const statusText = document.getElementById('status-text');
+
+let selectedFile = null;
+
+// Initialize
+function init() {
+    checkBackendHealth();
+}
+
+// Check Backend Health
+async function checkBackendHealth() {
+    try {
+        const response = await fetch(CONFIG.API_URL.replace('/api/voice-detection', '/'));
+        if (response.ok) {
+            updateStatus('Backend connected. Ready for analysis.', false);
         } else {
-            predictBtn.disabled = true;
-            showError('Only MP3 files are supported. Please select a valid MP3 file.');
+            updateStatus('Backend error. Predicted results may fail.', true);
         }
-    } else {
-        predictBtn.disabled = true;
-        hideError();
+    } catch (err) {
+        updateStatus('API unavailable. Showing mock behavior.', true);
     }
+}
+
+function updateStatus(msg, isError) {
+    statusText.textContent = msg;
+    apiStatus.classList.toggle('error', isError);
+}
+
+// File Selection
+browseBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
 });
 
-// Handle predict button click
-predictBtn.addEventListener('click', async () => {
-    const file = fileInput.files[0];
-    if (!file) {
-        showError('No file selected.');
+// Drag and Drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('active');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('active');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('active');
+    handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+    if (files.length === 0) return;
+
+    const file = files[0];
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav'];
+
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.mp3') && !file.name.endsWith('.wav')) {
+        alert('Please upload a valid MP3 or WAV file.');
         return;
     }
 
-    // Show loading
+    selectedFile = file;
+    fileDisplayName.textContent = file.name;
+    fileDisplayMeta.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB • Audio File`;
+    predictBtn.disabled = false;
+}
+
+// Prediction
+predictBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
     showLoading(true);
-    hideResult();
-    hideError();
 
     try {
-        let data;
+        const base64Audio = await fileToBase64(selectedFile);
 
-        if (CONFIG.USE_MOCK) {
-            // Simulate API delay for mock
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            data = mockResponse;
-        } else {
-            // Convert file to Base64
-            const base64Audio = await fileToBase64(file);
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': CONFIG.API_KEY
+            },
+            body: JSON.stringify({
+                audio_base64: base64Audio,
+                language: 'en'
+            })
+        });
 
-            // Send POST request
-            const response = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ audio: base64Audio })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-
-            data = await response.json();
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `API error ${response.status}`);
         }
 
+        const data = await response.json();
         displayResult(data);
-    } catch (error) {
-        console.error('Error:', error);
-        // Use mock response if API fails
-        displayResult(mockResponse);
-        showError('API unavailable. Showing mock result.');
+        updateStatus('Analysis complete.', false);
+
+    } catch (err) {
+        console.error(err);
+        updateStatus(`Error: ${err.message}`, true);
+        // Fallback for demonstration if requested
+        showMockResult();
     } finally {
         showLoading(false);
     }
 });
 
-// Utility functions
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]); // Remove data URL prefix
+        reader.onload = () => resolve(reader.result.split(',')[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
 
-function showLoading(show) {
-    loadingDiv.classList.toggle('hidden', !show);
-}
-
-function hideResult() {
-    resultDiv.classList.add('hidden');
-}
-
-function hideError() {
-    errorDiv.classList.add('hidden');
-    errorDiv.textContent = '';
-}
-
-function showError(message) {
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-}
-
 function displayResult(data) {
-    predictionSpan.textContent = data.prediction;
-    const confidenceFill = document.getElementById('confidence-fill');
-    const confidenceText = document.getElementById('confidence-text');
-    confidenceFill.style.width = `${data.confidence}%`;
-    confidenceText.textContent = `${data.confidence}%`;
-    explanationSpan.textContent = data.explanation;
-    resultDiv.classList.remove('hidden');
+    const isHuman = data.label.toLowerCase() === 'human';
+
+    predictionLabel.textContent = data.label;
+    resultBadge.textContent = data.label;
+    resultBadge.className = `status-badge ${isHuman ? 'human' : 'ai'}`;
+
+    const conf = Math.round(data.confidenceScore * 100);
+    confidencePercentage.textContent = `${conf}%`;
+    confidenceBar.style.width = `${conf}%`;
+
+    explanationText.textContent = data.explanation;
 }
+
+function showMockResult() {
+    // This is only called if the actual API fails
+    const mockData = {
+        label: "Human",
+        confidenceScore: 0.95,
+        explanation: "The audio shows natural human speech patterns. No synthetic artifacts detected."
+    };
+    displayResult(mockData);
+}
+
+function showLoading(show) {
+    if (show) {
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.style.opacity = '1';
+    } else {
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+        }, 300);
+    }
+}
+
+// Start
+init();

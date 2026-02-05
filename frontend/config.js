@@ -1,10 +1,4 @@
-// Configuration file for API settings
 const CONFIG = {
-    API_URL: 'http://localhost:5000/predict', // Change this to your backend URL
-    USE_MOCK: false // Set to true to use mock API for demo purposes
+    API_URL: 'http://127.0.0.1:8000/api/voice-detection',
+    API_KEY: 'my-secret-key'
 };
-
-// Export for use in script.js
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
-}
