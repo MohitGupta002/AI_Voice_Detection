@@ -234,4 +234,4 @@ For questions or support, please open an issue on GitHub.
 
 ---
 
-Made with ❤️ by [Your Name](https://github.com/YOUR_USERNAME)
+Made with ❤️ by [Mohit Gupta](https://github.com/YOUR_USERNAME)
